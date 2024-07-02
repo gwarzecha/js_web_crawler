@@ -1,0 +1,12 @@
+{
+  "name": "js_web_crawler",
+  "version": "1.0.0",
+  "description": "A JavaScript web crawler to generate an internal links report",
+  "main": "main.js",
+  "type": "module",
+  "scripts": {
+    "start": "node main.js"
+  },
+  "author": "Garrett W",
+  "license": "ISC"
+}
