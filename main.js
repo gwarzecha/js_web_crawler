@@ -12,7 +12,8 @@ const main = async () => {
 
   const baseURL = process.argv[2];
   console.log(`Crawling ${baseURL}`);
-  await crawlPage(baseURL);
+  const pages = await crawlPage(baseURL);
+  console.log(pages);
 };
 
 main();

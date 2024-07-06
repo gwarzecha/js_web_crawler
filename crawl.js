@@ -28,27 +28,55 @@ const getURLsFromHTML = (htmlBody, baseURL) => {
   return urls;
 };
 
-const crawlPage = async (url) => {
-  console.log(`Crawling ${url}`);
-
+const fetchHTML = async (url) => {
   let res;
   try {
     res = await fetch(url);
   } catch (err) {
-    console.log(`${err.message}`);
+    throw new Error(`Got Network error: ${err.message}`);
   }
 
   if (res.status > 399) {
-    console.log(`${err.message}`);
+    throw new Error(`Got HTTP error: ${res.status} ${res.statusText}`);
   }
 
   const contentType = res.headers.get('content-type');
   if (!contentType || !contentType.includes('text/html')) {
-    console.log(`Got non-html response: ${contentType}`);
-    return;
+    throw new Error(`Got non-HTML response: ${contentType}`);
   }
 
-  console.log(await res.text());
+  return res.text();
+};
+
+const crawlPage = async (baseURL, currentURL = baseURL, pages = {}) => {
+  const currentURLObj = new URL(currentURL);
+  const baseURLObj = new URL(baseURL);
+
+  if (currentURLObj.hostname !== baseURLObj.hostname) {
+    return pages;
+  }
+
+  const normalizedCurrentURL = normalizeURL(currentURL);
+
+  if (pages[normalizedCurrentURL]) {
+    pages[normalizedCurrentURL]++;
+    return pages;
+  }
+  pages[normalizedCurrentURL] = 1;
+
+  let html = '';
+  try {
+    html = await fetchHTML(currentURL);
+  } catch (err) {
+    console.log(`${err.message}`);
+    return pages;
+  }
+
+  const nextURLs = getURLsFromHTML(html, baseURL);
+  for (const nextURL of nextURLs) {
+    await crawlPage(baseURL, nextURL, pages);
+  }
+  return pages;
 };
 
 export { getURLsFromHTML, normalizeURL, crawlPage };
