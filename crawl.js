@@ -9,8 +9,6 @@ const normalizeURL = (rawUrl) => {
   return newURL;
 };
 
-export { normalizeURL };
-
 const getURLsFromHTML = (htmlBody, baseURL) => {
   const urls = [];
   const dom = new JSDOM(htmlBody);
@@ -30,4 +28,27 @@ const getURLsFromHTML = (htmlBody, baseURL) => {
   return urls;
 };
 
-export { getURLsFromHTML };
+const crawlPage = async (url) => {
+  console.log(`Crawling ${url}`);
+
+  let res;
+  try {
+    res = await fetch(url);
+  } catch (err) {
+    console.log(`${err.message}`);
+  }
+
+  if (res.status > 399) {
+    console.log(`${err.message}`);
+  }
+
+  const contentType = res.headers.get('content-type');
+  if (!contentType || !contentType.includes('text/html')) {
+    console.log(`Got non-html response: ${contentType}`);
+    return;
+  }
+
+  console.log(await res.text());
+};
+
+export { getURLsFromHTML, normalizeURL, crawlPage };
